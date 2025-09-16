@@ -10,7 +10,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.platform.PlatformViewRegistry
 import me.yohom.foundation_fluttify.android.app.ActivityHandler
@@ -56,32 +55,10 @@ class FoundationFluttifyPlugin : FlutterPlugin, ActivityAware, MethodCallHandler
     private var activity: Activity? = null
     private var activityBinding: ActivityPluginBinding? = null
     private var pluginBinding: FlutterPlugin.FlutterPluginBinding? = null
-    private var registrar: Registrar? = null
     private var platformViewRegistry: PlatformViewRegistry? = null
     private var binaryMessenger: BinaryMessenger? = null
 
-    companion object {
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val plugin = FoundationFluttifyPlugin()
-            plugin.registrar = registrar
-            plugin.platformViewRegistry = registrar.platformViewRegistry()
-            plugin.binaryMessenger = registrar.messenger()
-            plugin.activity = registrar.activity()
-            plugin.applicationContext = registrar.activity()?.applicationContext
-            plugin.platformViewRegistry?.registerViewFactory("me.yohom/foundation_fluttify/android.view.SurfaceView", android_view_SurfaceViewFactory(registrar.messenger()))
-            plugin.platformViewRegistry?.registerViewFactory("me.yohom/foundation_fluttify/android.widget.FrameLayout", android_widget_FrameLayoutFactory())
-            plugin.platformViewRegistry?.registerViewFactory("me.yohom/foundation_fluttify/android.opengl.GLSurfaceView", android_opengl_GLSurfaceViewFactory())
-
-            gMethodChannel = MethodChannel(
-                    registrar.messenger(),
-                    "com.fluttify/foundation_method",
-                    StandardMethodCodec(FluttifyMessageCodec())
-            )
-            gMethodChannel.setMethodCallHandler(plugin)
-
-        }
-    }
+    companion object {}
 
     override fun onMethodCall(methodCall: MethodCall, methodResult: Result) {
         val rawArgs = methodCall.arguments ?: mapOf<String, Any>()
@@ -94,7 +71,7 @@ class FoundationFluttifyPlugin : FlutterPlugin, ActivityAware, MethodCallHandler
                 startsWith("android.os.Bundle::") -> BundleHandler(methodCall.method, rawArgs, methodResult)
                 startsWith("android.content.Intent::") -> IntentHandler(methodCall.method, rawArgs, methodResult)
                 startsWith("android.content.Context::") -> ContextHandler(methodCall.method, rawArgs, methodResult)
-                startsWith("android.content.BroadcastReceiver::") -> BroadcastReceiverHandler(methodCall.method, rawArgs, registrar?.messenger(), methodResult)
+                startsWith("android.content.BroadcastReceiver::") -> BroadcastReceiverHandler(methodCall.method, rawArgs, binaryMessenger, methodResult)
                 startsWith("android.content.IntentFilter::") -> IntentFilterHandler(methodCall.method, rawArgs, methodResult)
                 startsWith("android.graphics.Bitmap::") -> BitmapHandler(methodCall.method, rawArgs, methodResult, activity)
                 startsWith("android.graphics.Point::") -> PointHandler(methodCall.method, rawArgs, methodResult)
@@ -106,7 +83,7 @@ class FoundationFluttifyPlugin : FlutterPlugin, ActivityAware, MethodCallHandler
                 startsWith("android.view.ViewGroup::") -> ViewGroupHandler(methodCall.method, rawArgs, methodResult)
                 startsWith("android.widget.ImageView::") -> ImageViewHandler(methodCall.method, rawArgs, methodResult, activity)
                 startsWith("java.io.File::") -> FileHandler(methodCall.method, rawArgs, methodResult)
-                startsWith("PlatformService::") -> PlatformService(methodCall.method, rawArgs as Map<String, Any>, methodResult, activityBinding, pluginBinding, registrar)
+                startsWith("PlatformService::") -> PlatformService(methodCall.method, rawArgs as Map<String, Any>, methodResult, activityBinding, pluginBinding)
                 else -> methodResult.notImplemented()
             }
         }

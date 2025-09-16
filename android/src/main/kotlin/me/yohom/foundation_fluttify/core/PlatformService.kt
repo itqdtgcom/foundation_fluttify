@@ -8,7 +8,6 @@ import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
 import me.yohom.foundation_fluttify.HEAP
 import me.yohom.foundation_fluttify.STACK
 import me.yohom.foundation_fluttify.enableLog
@@ -18,8 +17,7 @@ fun PlatformService(
         args: Map<String, Any>,
         methodResult: MethodChannel.Result,
         activityBinding: ActivityPluginBinding?,
-        pluginBinding: FlutterPlugin.FlutterPluginBinding?,
-        registrar: PluginRegistry.Registrar?
+        pluginBinding: FlutterPlugin.FlutterPluginBinding?
 ) {
     when (method) {
         "PlatformService::enableLog" -> {
@@ -158,8 +156,7 @@ fun PlatformService(
             val flutterAssetPath = args["flutterAssetPath"] as String
 
             if (activity != null) {
-                val path = registrar?.lookupKeyForAsset(flutterAssetPath)
-                        ?: pluginBinding?.flutterAssets?.getAssetFilePathByName(flutterAssetPath)
+                val path = pluginBinding?.flutterAssets?.getAssetFilePathByName(flutterAssetPath)
                 methodResult.success(path)
             } else {
                 methodResult.error("非当前请求的响应", "非当前请求的响应", "非当前请求的响应")
