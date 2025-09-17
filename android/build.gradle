@@ -28,6 +28,11 @@ android {
     namespace "me.yohom.foundation_fluttify"
     compileSdkVersion 31
 
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
